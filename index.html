@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Leaderboard + Memory Card</title>
+<style>
+:root {
+    --bg: #f4f6fb;
+    --card: #fff;
+    --text: #0f172a;
+    --muted: #6b7280;
+    --primary: #4f46e5;
+    --radius: 12px;
+    --avatar-size: 56px;
+}
+
+body.dark {
+    --bg: #0f172a;
+    --card: #111827;
+    --text: #e6eef8;
+    --muted: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+    background: linear-gradient(180deg, var(--bg));
+    color: var(--text);
+    min-height: 100vh;
+    padding: 18px;
+    transition: background .25s, color .25s;
+}
+
+/* NAV */
+.nav {
+    max-width: 980px;
+    margin: 0 auto 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tab {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.tab.active {
+    background: var(--card);
+    border-color: rgba(15,23,42,0.06);
+    box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+    color: var(--text);
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(15,23,42,0.06);
+}
+
+.dark-toggle {
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(15,23,42,0.06);
+    cursor: pointer;
+    background: transparent;
+}
+
+/* container */
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+    background: transparent;
+    display: block;
+}
+
+/* Panel */
+.panel {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 3px teal;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.title h1 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Leaderboard */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 48px 64px 1fr 110px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 12px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.item + .item {
+    border-top: 1px solid rgba(15,23,42,0.04);
+    padding-top: 12px;
+}
+
+.rank {
+    font-weight: 800;
+    color: var(--primary);
+    text-align: center;
+}
+
+.avatar-wrap {
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+
+.avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    display: block;
+    border: 3px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+.avatar-frame {
+    position: absolute;
+    left: -8px;
+    top: -8px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    display: none;
+}
+
+.has-frame .avatar-frame {
+    display: block;
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.meta .rankTitle {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.score {
+    text-align: right;
+    font-weight: 800;
+}
+
+/* Badge fix */
+.name-with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  max-width: 200px;          /* batas lebar nama */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.name-with-badge span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name-with-badge img {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Game UI */
+.game-setup {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.input,
+select {
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid rgb(0,128,128) ;
+}
+
+.board {
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.card {
+    width: 76px;
+    height: 76px;
+    border-radius: 12px;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+    transition: transform .12s, background .12s;
+}
+
+.card.back {
+    background: linear-gradient(180deg, #eef2ff, #fff);
+}
+
+.card.flipped {
+    transform: scale(1.03);
+    background: var(--primary);
+    color: white;
+}
+
+.result {
+    margin-top: 10px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+/* Modal */
+.overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2,6,23,0.45);
+    z-index: 100;
+}
+
+.overlay.show {
+    display: flex;
+}
+
+.modal {
+    background: var(--card);
+    padding: 6px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 92%;
+    box-shadow: 0 18px 50px rgba(2,6,23,0.35);
+    text-align: center;
+}
+
+.modal img {
+    max-width: 150px;
+    display: block;
+    margin: 8px auto;
+    border-radius: 10px;
+}
+
+.modal .muted {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* small screens */
+@media (max-width: 720px) {
+    .item {
+        grid-template-columns: 30px 56px 1fr 80px;
+    }
+    .avatar {
+        width: 50px;
+        height: 50px;
+    }
+    .avatar-frame {
+        width: 60px;
+        height: 60px;
+        left: -6px;
+        top: -6px;
+    }
+    .card {
+        width: 60px;
+        height: 64px;
+        font-size: 28px;
+    }
+}
+</style>
+</head>
+<body>
+  <div class="nav">
+    <div class="tabs">
+      <button class="tab active" id="tab-leaderboard">Leaderboard</button>
+      <button class="tab" id="tab-game">Game</button>
+    </div>
+    <div class="controls">
+      <button class="dark-toggle" id="darkToggle">🌙 ☀️</button>
+      <button class="btn ghost" id="clearData" title="Reset data">Reset</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Leaderboard -->
+    <section id="panelLeaderboard" class="panel">
+      <div class="header">
+        <div class="title">
+          <h1>Leaderboard</h1>
+          <div class="subtitle">Capai Point 6500. Untuk klaim frame avatar spesial. </div>
+        </div>
+        <div>
+          <button class="btn" id="btnAddSample">Tambah Sample</button>
+        </div>
+      </div>
+      <div class="list" id="leaderList"></div>
+    </section>
+
+    <!-- Game -->
+    <section id="panelGame" class="panel" style="display:none;margin-top:16px">
+      <div class="header" style="margin-bottom:8px">
+        <div>
+          <h1>Wellcome!</h1>
+          <div class="subtitle">Upload avatar (opsional). Jika tidak, gunakan avatar default.</div>
+        </div>
+      </div>
+
+      <div class="game-setup">
+        <input id="playerName" class="input" placeholder="Nama player" />
+        <input id="avatarFile" type="file" accept="image/*" class="input" />
+        <select id="level">
+          <option value="easy">Easy — 2 pasangan (4 kartu)</option>
+          <option value="medium">Medium — 4 pasangan (8 kartu)</option>
+          <option value="hard" selected>Hard — 8 pasangan (16 kartu)</option>
+        </select>
+        <button class="btn" id="startBtn">Mulai Game</button>
+        <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+          <div class="muted">Total Skor Anda:</div>
+          <div id="currentPlayerScore" style="font-weight:800">-</div>
+        </div>
+      </div>
+
+      <div id="gameArea">
+        <div id="board" class="board"></div>
+        <div class="result" id="gameResult"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Claim modal -->
+  <div class="overlay" id="claimOverlay" aria-hidden="true">
+    <div class="modal" role="dialog">
+      <h3>🎉 SELAMATT 🎉</h3>
+      <p class="muted">Andaa sudahh dapat meng-klaim frame avatar</p>
+      <img id="specialFramePreview" src="" alt="Frame Spesial">
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button class="btn" id="claimBtn">KLAIM FRAME</button>
+        <button class="btn ghost" id="closeClaim">TUTUP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Info modal -->
+  <div class="overlay" id="playerOverlay" aria-hidden="true">
+    <div class="modal" role="dialog">
+      <h3>Info Player</h3>
+      <div id="playerInfoBox" style="margin:12px 0;text-align:center"></div>
+      <div id="editBox" style="display:none;margin-top:12px">
+        <input id="editName" class="input" placeholder="Edit nama" />
+        <input id="editAvatar" type="file" accept="image/*" class="input" />
+        <button class="btn" id="saveEdit">Simpan</button>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button class="btn ghost" id="closePlayerInfo">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const STORAGE_KEY = 'lb_players_v2';
+const DEFAULT_AVATAR_URL = 'https://i.ibb.co/5Y7wH1x/default-avatar.png';
+const FRAME_URL = 'frame1.png';
+const SPECIAL_FRAME_URL = 'frame1.png';
+
+async function loadPlayers(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw){
+      const resp = await fetch('players.json');
+      if(resp.ok){
+        return await resp.json();
+      } else {
+        return [];
+      }
+    }
+    return JSON.parse(raw);
+  }catch(e){ console.error(e); return []; }
+}
+
+function savePlayers(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+
+let players = [];
+let currentPlayerName = null;
+let uploadedAvatarData = null;
+
+const tabLeaderboard = document.getElementById('tab-leaderboard');
+const tabGame = document.getElementById('tab-game');
+const panelLeaderboard = document.getElementById('panelLeaderboard');
+const panelGame = document.getElementById('panelGame');
+const leaderList = document.getElementById('leaderList');
+const startBtn = document.getElementById('startBtn');
+const playerNameInput = document.getElementById('playerName');
+const avatarFileInput = document.getElementById('avatarFile');
+const levelSelect = document.getElementById('level');
+const boardEl = document.getElementById('board');
+const gameResult = document.getElementById('gameResult');
+const currentPlayerScoreEl = document.getElementById('currentPlayerScore');
+const claimOverlay = document.getElementById('claimOverlay');
+const claimBtn = document.getElementById('claimBtn');
+const closeClaim = document.getElementById('closeClaim');
+const specialFramePreview = document.getElementById('specialFramePreview');
+const darkToggle = document.getElementById('darkToggle');
+const clearDataBtn = document.getElementById('clearData');
+const btnAddSample = document.getElementById('btnAddSample');
+
+const playerOverlay = document.getElementById('playerOverlay');
+const playerInfoBox = document.getElementById('playerInfoBox');
+const editBox = document.getElementById('editBox');
+const editName = document.getElementById('editName');
+const editAvatar = document.getElementById('editAvatar');
+const saveEdit = document.getElementById('saveEdit');
+const closePlayerInfo = document.getElementById('closePlayerInfo');
+
+let popupTargetPlayer = null;
+
+async function init(){
+  players = await loadPlayers();
+
+  tabLeaderboard.addEventListener('click', ()=>showTab('leaderboard'));
+  tabGame.addEventListener('click', ()=>showTab('game'));
+  showTab('leaderboard');
+
+  const dm = localStorage.getItem('dark_mode') === 'true';
+  if(dm) document.body.classList.add('dark');
+  darkToggle.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark');
+    localStorage.setItem('dark_mode', document.body.classList.contains('dark'));
+  });
+
+  avatarFileInput.addEventListener('change', handleAvatarUpload);
+  startBtn.addEventListener('click', startGame);
+
+  claimBtn.addEventListener('click', claimFrame);
+  closeClaim.addEventListener('click', ()=>claimOverlay.classList.remove('show'));
+
+  clearDataBtn.addEventListener('click', async ()=>{
+    const pass = prompt('masukan kodenya minn:>');
+    if(pass !== 'admin123'){
+      alert('fitur khusus admin ⊘');
+      return;
+    }
+    if(confirm('Reset semua data leaderboard?')){
+      localStorage.removeItem(STORAGE_KEY);
+      players = await loadPlayers();
+      renderLeaderboard();
+      alert('berhasil diresett:3');
+    }
+  });
+
+  btnAddSample.addEventListener('click', ()=>{
+    players.push({name:'Nikoll', avatar:'l1.jpg', score:10981, claimed:false, playsEasy:6719, playsMedium:907, playsHard:109, badge:""});
+    players.push({name:'Yanzz', avatar:'l2', score:9871, claimed:false, playsEasy:4918, playsMedium:876, playsHard:209, badge:""});
+    savePlayers(players); renderLeaderboard();
+  });
+
+  leaderList.addEventListener('click', (e)=>{
+    const item = e.target.closest('.item');
+    if(!item) return;
+    const idx = [...leaderList.children].indexOf(item);
+    popupTargetPlayer = players[idx];
+    showPlayerInfo(popupTargetPlayer);
+  });
+
+  closePlayerInfo.addEventListener('click', ()=>playerOverlay.classList.remove('show'));
+  saveEdit.addEventListener('click', saveEditPlayer);
+
+  renderLeaderboard();
+  updateCurrentPlayerScoreUI();
+}
+init();
+
+function showTab(name){
+  if(name==='leaderboard'){
+    panelLeaderboard.style.display='block';
+    panelGame.style.display='none';
+    tabLeaderboard.classList.add('active'); tabGame.classList.remove('active');
+  } else {
+    panelLeaderboard.style.display='none';
+    panelGame.style.display='block';
+    tabLeaderboard.classList.remove('active'); tabGame.classList.add('active');
+  }
+}
+
+function renderLeaderboard(){
+  players.sort((a,b)=>b.score - a.score);
+  leaderList.innerHTML = '';
+  players.forEach((p,idx)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'item' + (p.claimed ? ' has-frame' : '');
+    const avatarSrc = p.avatar || DEFAULT_AVATAR_URL;
+    wrap.innerHTML = `
+      <div class="rank">${idx+1}</div>
+      <div class="avatar-wrap ${p.claimed ? 'has-frame' : ''}">
+        <div class="avatar" style="background-image:url('${escapeHtml(avatarSrc)}')"></div>
+        <div class="avatar-frame" style="background-image:url('${p.claimed ? SPECIAL_FRAME_URL : FRAME_URL}')"></div>
+      </div>
+      <div class="meta">
+        <div class="name-with-badge"><span>${escapeHtml(p.name)}</span> ${p.badge ? '<img src="'+p.badge+'" alt="badge">' : ''}</div>
+        <div class="rankTitle">${rankTitle(p.score)}</div>
+      </div>
+      <div class="score">${p.score.toLocaleString()}</div>
+    `;
+    leaderList.appendChild(wrap);
+  });
+}
+
+function rankTitle(score){
+  if(score >= 10000) return 'MASTER ✦ ';
+  if(score >= 6500) return 'LEGENDA III';
+  if(score >= 6000) return 'LEGENDA II';
+  if(score >= 5500) return 'LEGENDA I';
+  if(score >= 5000) return 'MASTER III';
+  if(score >= 4500) return 'MASTER II';
+  if(score >= 4000) return 'MASTER I';
+  if(score >= 3500) return 'JUARA III';
+  if(score >= 3000) return 'JUARA II';
+  if(score >= 2500) return 'JUARA I';
+  if(score >= 2000) return 'PEMULA III';
+  if(score >= 1500) return 'PEMULA II';
+  if(score >= 1000) return 'PEMULA I';
+  return 'PEMULA';
+}
+
+function handleAvatarUpload(e){
+  const f = e.target.files && e.target.files[0];
+  if(!f) { uploadedAvatarData = null; return; }
+  if(!f.type.startsWith('image/')) { alert('pilih gambar kamu.'); avatarFileInput.value=''; uploadedAvatarData=null; return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    uploadedAvatarData = ev.target.result;
+    updateCurrentPlayerScoreUI();
+  };
+  reader.readAsDataURL(f);
+}
+
+const EMOJIS = ["🍓","🍒","🍎","🍅","🥝","🫐","🥑","🍋"];
+let firstCard = null, lock=false, steps=0, matched=0;
+
+function startGame(){
+  const name = playerNameInput.value.trim();
+  if(!name){ alert('Masukkan nama player sebelum mulai.'); playerNameInput.focus(); return; }
+  currentPlayerName = name;
+  ensurePlayerExists(name, uploadedAvatarData);
+  uploadedAvatarData = null; avatarFileInput.value = '';
+  updateCurrentPlayerScoreUI();
+
+  const lvl = levelSelect.value;
+  let pairs=8;
+  if(lvl==='easy') pairs=2;
+  else if(lvl==='medium') pairs=4;
+  else pairs=8;
+
+  const chosen = EMOJIS.slice(0,pairs);
+  const cards = [...chosen,...chosen].sort(()=>Math.random()-0.5);
+  boardEl.style.gridTemplateColumns = `repeat(${Math.sqrt(cards.length)},1fr)`;
+  boardEl.innerHTML='';
+  cards.forEach(symbol=>{
+    const el=document.createElement('div');
+    el.className='card back';
+    el.dataset.symbol=symbol;
+    el.addEventListener('click',()=>flipCard(el));
+    boardEl.appendChild(el);
+  });
+  steps=0; matched=0; gameResult.textContent='';
+}
+
+function flipCard(card){
+  if(lock || !card.classList.contains('back')) return;
+  card.textContent = card.dataset.symbol;
+  card.classList.remove('back');
+  card.classList.add('flipped');
+  if(!firstCard){ firstCard=card; return; }
+  steps++;
+  if(card.dataset.symbol === firstCard.dataset.symbol){
+    matched+=2;
+    firstCard=null;
+    if(matched === boardEl.children.length){
+      endGame(steps);
+    }
+  } else {
+    lock=true;
+    setTimeout(()=>{
+      card.textContent='';
+      card.classList.remove('flipped'); card.classList.add('back');
+      firstCard.textContent='';
+      firstCard.classList.remove('flipped'); firstCard.classList.add('back');
+      firstCard=null; lock=false;
+    },700);
+  }
+}
+
+function endGame(steps){
+  const p = players.find(x=>x.name.toLowerCase()===currentPlayerName.toLowerCase());
+  if(!p) return;
+  const lvl = levelSelect.value;
+  let bonus=0;
+  if(lvl==='easy'){ bonus=150; p.playsEasy=(p.playsEasy||0)+1; }
+  else if(lvl==='medium'){ bonus=200; p.playsMedium=(p.playsMedium||0)+1; }
+  else { bonus=350; p.playsHard=(p.playsHard||0)+1; }
+
+  p.score += bonus;
+  savePlayers(players); renderLeaderboard(); updateCurrentPlayerScoreUI();
+  gameResult.textContent = `selesai dalam ${steps} langkah! + ${bonus} point`;
+
+  if(p.score>=6500 && !p.claimed){
+    specialFramePreview.src = SPECIAL_FRAME_URL;
+    claimOverlay.classList.add('show');
+  }
+}
+
+function ensurePlayerExists(name, avatarData){
+  let p = players.find(x=>x.name.toLowerCase()===name.toLowerCase());
+  if(!p){
+    p={name, avatar: avatarData||DEFAULT_AVATAR_URL, score:0, claimed:false, playsEasy:0, playsMedium:0, playsHard:0, badge:""};
+    players.push(p); savePlayers(players); renderLeaderboard();
+  } else {
+    if(avatarData) p.avatar=avatarData;
+  }
+}
+
+function claimFrame(){
+  const p = players.find(x=>x.name.toLowerCase()===currentPlayerName.toLowerCase());
+  if(p){ p.claimed=true; savePlayers(players); renderLeaderboard(); }
+  claimOverlay.classList.remove('show');
+}
+
+function updateCurrentPlayerScoreUI(){
+  if(!currentPlayerName){ currentPlayerScoreEl.textContent='-'; return; }
+  const p = players.find(x=>x.name.toLowerCase()===currentPlayerName.toLowerCase());
+  if(!p){ currentPlayerScoreEl.textContent='-'; return; }
+  currentPlayerScoreEl.textContent = p.score.toLocaleString();
+}
+
+function showPlayerInfo(p){
+  if(!p) return;
+  playerInfoBox.innerHTML=`
+    <div style="position:relative;display:inline-block">
+      <img src="${p.avatar}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
+      ${p.claimed?`<img src="${SPECIAL_FRAME_URL}" style="position:absolute;left:-12px;top:-12px;width:124px;height:124px;border-radius:50%">`:''}
+    </div>
+    <div class="name-with-badge" style="margin-top:-5;font-weight:700;font-weight:bold;justify-content:center">
+      <span>${escapeHtml(p.name)}</span>
+      ${p.badge ? '<img src="'+p.badge+'" alt="badge" style="width:20px;height:20px">' : ''}
+    </div>
+    <div style="color:var(--muted);font-size:13px; font-weight: bold; color:gold">${rankTitle(p.score)}• ${p.score.toLocaleString()} POINTS</div>
+
+    <div style="margin-top:15px;text-align:left;font-size:13px;color:var(--muted); font-weight: bold">
+      <div>🎯 STATISTIK PERMAINAN:</div>
+      <ul style="margin-top:13px;list-style:none;padding-left:0;line-height:1.5; font-weight: bold">
+        <li>EASY : ${p.playsEasy||0} X</li>
+        <li>MEDIUM : ${p.playsMedium||0} X</li>
+        <li>HARD : ${p.playsHard||0} X</li>
+      </ul>
+    </div>
+  `;
+  if(currentPlayerName && p.name.toLowerCase()===currentPlayerName.toLowerCase()){
+    editBox.style.display='block';
+    editName.value=p.name;
+  } else editBox.style.display='none';
+  playerOverlay.classList.add('show');
+}
+
+function saveEditPlayer(){
+  if(!popupTargetPlayer) return;
+  popupTargetPlayer.name = editName.value.trim()||popupTargetPlayer.name;
+  if(editAvatar.files && editAvatar.files[0]){
+    const reader=new FileReader();
+    reader.onload=function(ev){ popupTargetPlayer.avatar=ev.target.result; savePlayers(players); renderLeaderboard(); updateCurrentPlayerScoreUI(); showPlayerInfo(popupTargetPlayer); };
+    reader.readAsDataURL(editAvatar.files[0]);
+  } else {
+    savePlayers(players); renderLeaderboard(); updateCurrentPlayerScoreUI(); showPlayerInfo(popupTargetPlayer);
+  }
+}
+
+function escapeHtml(str){ return str.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m])); }
+</script>
+</body>
+
+</html>
