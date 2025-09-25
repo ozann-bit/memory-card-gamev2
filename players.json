@@ -1,0 +1,42 @@
+[
+  {
+    "name": "ozan",
+    "avatar": "l.jpg",
+    "score": 18981,
+    "claimed": false,
+    "playsEasy": 1902,
+    "playsMedium": 2881,
+    "playsHard": 8791,
+    "badge": "p.png"
+  },
+  {
+    "name": "𝑨𝒖𝒍𝒍",
+    "avatar": "p.jpg",
+    "score": 11871,
+    "claimed": true,
+    "playsEasy": 9891,
+    "playsMedium": 1091,
+    "playsHard": 561,
+    "badge": "vip.png"
+  },
+  {
+    "name": "ყα૨αα",
+    "avatar": "pk.jpg",
+    "score": 12781,
+    "claimed": true,
+    "playsEasy": 90387,
+    "playsMedium": 2081,
+    "playsHard": 598,
+    "badge": "vip.png"
+  },
+  {
+    "name": "Rexxx",
+    "avatar": "l1.jpg",
+    "score": 16871,
+    "claimed": true,
+    "playsEasy": 2716,
+    "playsMedium": 4571,
+    "playsHard": 2761,
+    "badge": "vip.png"
+  }
+]
